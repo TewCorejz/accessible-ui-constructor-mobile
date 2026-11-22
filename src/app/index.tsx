@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AccessibilityInfo,
   Modal,
@@ -28,6 +28,13 @@ export default function HomeScreen() {
     (item) => theme === 'student' || !STUDENT_TYPES.includes(item.type),
   );
 
+  // Сообщение исчезает само, чтобы не вводить в заблуждение после других действий.
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => setNotice(''), 5000);
+    return () => clearTimeout(timer);
+  }, [notice]);
+
   const say = (message: string) => {
     setNotice(message);
     AccessibilityInfo.announceForAccessibility(message);
@@ -46,6 +53,7 @@ export default function HomeScreen() {
           Название интерфейса
         </Text>
         <TextInput
+          underlineColorAndroid="transparent"
           value={store.name}
           onChangeText={store.setName}
           maxLength={80}
@@ -108,7 +116,7 @@ export default function HomeScreen() {
                 <IconButton
                   icon="trash-outline"
                   label={`Удалить виджет «${widgetTitle(w.type)}»`}
-                  color={C.danger}
+                  color={look.onSurface === '#ffffff' ? '#ff9aa9' : C.danger}
                   onPress={() => {
                     store.removeWidget(w.id);
                     say(`Виджет «${widgetTitle(w.type)}» удалён.`);
@@ -205,6 +213,7 @@ const styles = StyleSheet.create({
   content: { padding: 16, gap: 18, paddingBottom: 32 },
   label: { fontSize: 16, fontWeight: '600', color: C.text },
   input: {
+    backgroundColor: C.card, // убирает системное подчёркивание поля на Android
     marginTop: 10,
     minHeight: 52,
     borderWidth: 1,
