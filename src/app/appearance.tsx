@@ -57,6 +57,7 @@ function ColorPicker({
       <View style={styles.customRow}>
         <View style={[styles.customPreview, { backgroundColor: value }]} />
         <TextInput
+          underlineColorAndroid="transparent"
           value={custom}
           onChangeText={(text) => {
             const next = text.startsWith('#') ? text : `#${text}`;
@@ -223,6 +224,7 @@ const styles = StyleSheet.create({
   customRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   customPreview: { width: 40, height: 40, borderRadius: 10, borderWidth: 1, borderColor: C.border },
   customInput: {
+    backgroundColor: C.card, // убирает системное подчёркивание поля на Android
     flex: 1,
     minHeight: 48,
     borderWidth: 1,

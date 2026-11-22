@@ -13,6 +13,7 @@ export function WidgetView({ type, look }: { type: WidgetType; look: Look }) {
   const text = { color: look.onSurface, fontSize: t };
   const muted = { color: look.muted, fontSize: Math.round(t * 0.9) };
   const iconBg = tint(look.primary, 0.12, look.surface);
+  const stacked = t >= 19;
 
   const heading = (icon: IconName, title: string) => (
     <View style={styles.row}>
@@ -108,8 +109,14 @@ export function WidgetView({ type, look }: { type: WidgetType; look: Look }) {
               <View style={styles.flex}>
                 <Text style={[text, styles.medium]}>{op.title}</Text>
                 <Text style={muted}>{op.date}</Text>
+                {/* При крупном тексте сумма уходит под название, чтобы строки не дробились */}
+                {stacked && (
+                  <Text style={[text, styles.bold, op.income && { color: look.primary }]}>{op.sum}</Text>
+                )}
               </View>
-              <Text style={[text, styles.bold, op.income && { color: look.primary }]}>{op.sum}</Text>
+              {!stacked && (
+                <Text style={[text, styles.bold, op.income && { color: look.primary }]}>{op.sum}</Text>
+              )}
             </View>
           ))}
         </View>
