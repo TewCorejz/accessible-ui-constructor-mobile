@@ -1,56 +1,108 @@
-# Welcome to your Expo app 👋
+<div align="center">
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<img src="docs/logo.svg" alt="Логотип «Конструктор доступных интерфейсов»" width="112" height="112" />
 
-## Get started
+# Конструктор доступных интерфейсов — мобильное приложение
 
-1. Install dependencies
+**Соберите понятный главный экран банка у себя в телефоне: крупные виджеты, свой размер текста и цвета.**
 
-   ```bash
-   npm install
-   ```
+Стартап-проект · Заказчик — Сбер · Статус: рабочий макет
 
-2. Start the app
+![Expo](https://img.shields.io/badge/Expo-SDK_58-000020?logo=expo&logoColor=white)
+![React Native](https://img.shields.io/badge/React_Native-0.88-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
+[![CI](https://github.com/TewCorejz/accessible-ui-constructor-mobile/actions/workflows/ci.yml/badge.svg)](https://github.com/TewCorejz/accessible-ui-constructor-mobile/actions/workflows/ci.yml)
 
-   ```bash
-   npx expo start
-   ```
+Веб-версия для компьютера и планшета: [accessible-ui-constructor](https://github.com/TewCorejz/accessible-ui-constructor) · [демо](https://tewcorejz.github.io/accessible-ui-constructor/)
 
-In the output, you'll find options to open the app in a
+</div>
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 📱 Экраны
 
-## Get a fresh project
+<table>
+  <tr>
+    <td><img src="docs/screenshots/home.jpg" alt="Мой банк" width="200" /></td>
+    <td><img src="docs/screenshots/catalog.jpg" alt="Добавить виджет" width="200" /></td>
+    <td><img src="docs/screenshots/appearance.jpg" alt="Оформление" width="200" /></td>
+    <td><img src="docs/screenshots/choose.jpg" alt="Выбрать" width="200" /></td>
+  </tr>
+  <tr>
+    <td align="center">Мой банк</td>
+    <td align="center">Добавить виджет</td>
+    <td align="center">Оформление</td>
+    <td align="center">Шаблоны</td>
+  </tr>
+</table>
 
-When you're ready, run:
+## ✨ Что умеет
+
+| Вкладка | Возможности |
+|---|---|
+| **Мой банк** | Название интерфейса, виджеты во всю ширину экрана, режим расстановки (выше / ниже / удалить), каталог виджетов в выезжающей панели, сохранение |
+| **Выбрать** | Сохранённые интерфейсы, новый интерфейс, шаблоны под шторкой с превью по запросу |
+| **Оформление** | Размер основного текста 12–28 px (ползунок и кнопки − / +), основной и дополнительный цвет, проверка контраста по WCAG, «Поделиться настройками», «Начать заново» |
+
+Все данные хранятся только на устройстве (AsyncStorage). Формат конфигурации совпадает с веб-версией — настройки можно переносить между приложениями.
+
+### Доступность
+
+- цели нажатия не меньше 48 × 48 pt, основные кнопки — 56 pt;
+- у всех кнопок есть подписи для VoiceOver и TalkBack, у переключателей — состояние;
+- после действий (добавить, переставить, сохранить) приложение озвучивает результат;
+- текст учитывает системный размер шрифта телефона;
+- цвет текста на фоне виджетов подбирается автоматически, низкий контраст подсвечивается.
+
+## 🚀 Запуск
+
+Нужны **Node.js 22** и приложение **Expo Go** на телефоне ([iOS](https://apps.apple.com/app/expo-go/id982107779) / [Android](https://play.google.com/store/apps/details?id=host.exp.exponent)).
 
 ```bash
-npm run reset-project
+git clone https://github.com/TewCorejz/accessible-ui-constructor-mobile.git
+cd accessible-ui-constructor-mobile
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+Отсканируйте QR-код из терминала камерой iPhone или приложением Expo Go на Android. Телефон и компьютер должны быть в одной Wi-Fi сети.
 
-### Other setup steps
+| Команда | Что делает |
+|---|---|
+| `npx expo start` | Dev-сервер, QR-код для Expo Go |
+| `npm run ios` / `npm run android` | Открыть в симуляторе iOS / эмуляторе Android |
+| `npm run web` | Открыть в браузере (для быстрой проверки) |
+| `npm run typecheck` | Проверка типов |
+| `npm run lint` | Линтер |
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## 🗂 Структура
 
-## Learn more
+```
+src/
+├── app/                 # Экраны (Expo Router): каждая вкладка — файл
+│   ├── _layout.tsx      # Нижние вкладки, загрузка сохранённых данных
+│   ├── index.tsx        # «Мой банк»
+│   ├── choose.tsx       # «Выбрать»: сохранённые и шаблоны
+│   └── appearance.tsx   # «Оформление»
+├── components/
+│   └── WidgetView.tsx   # Содержимое виджетов (демо-данные)
+├── lib/
+│   ├── model.ts         # Виджеты, шаблоны, расчёт оформления
+│   ├── appearance.ts    # Размер текста, палитра, контраст (общий с веб-версией)
+│   └── store.tsx        # Состояние приложения и сохранение на устройстве
+└── ui/kit.tsx           # Кнопки, карточки, цвета приложения
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🧭 Дорожная карта
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- [x] Рабочий макет: три вкладки, виджеты, шаблоны, оформление, сохранение
+- [ ] Импорт настроек из файла веб-версии
+- [ ] Перетаскивание виджетов пальцем (сейчас — кнопки «выше» / «ниже»)
+- [ ] Проверка с VoiceOver и TalkBack на реальных устройствах
+- [ ] Сборка через EAS и тестовая раздача (TestFlight / внутреннее тестирование Google Play)
 
-## Join the community
+## 📄 Лицензия и правовая информация
 
-Join our community of developers creating universal apps.
+© 2026 Команда проекта «Конструктор доступных интерфейсов». Все права защищены — см. [LICENSE](LICENSE).
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Проект разрабатывается командой стартапа по заказу Сбера и не является официальным продуктом ПАО Сбербанк. Товарные знаки «Сбер» и «СберБанк» в приложении не используются. Все суммы, карты и операции — вымышленные.

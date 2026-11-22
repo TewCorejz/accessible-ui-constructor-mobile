@@ -1,0 +1,30 @@
+name: 🐞 Ошибка
+description: Что-то работает не так
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: Что случилось
+      description: Опишите проблему и чего вы ожидали.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как воспроизвести
+      placeholder: |
+        1. Открыть «Создать»
+        2. Добавить виджет «Баланс»
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Браузер и устройство
+      placeholder: Safari 18, iPhone 15 / Chrome 130, macOS
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Скриншоты

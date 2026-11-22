@@ -1,98 +1,295 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useState } from 'react';
+import {
+  AccessibilityInfo,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { WidgetView } from '@/components/WidgetView';
+import { tint } from '@/lib/appearance';
+import { STUDENT_TYPES, catalog, resolveLook, widgetTitle, type WidgetType } from '@/lib/model';
+import { useStore } from '@/lib/store';
+import { Button, C, Card, IconButton, SectionTitle } from '@/ui/kit';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+export default function HomeScreen() {
+  const store = useStore();
+  const { widgets, theme, appearance, editing } = store;
+  const [catalogOpen, setCatalogOpen] = useState(false);
+  const [notice, setNotice] = useState('');
+  const look = resolveLook(theme, appearance);
+  const available = catalog.filter(
+    (item) => theme === 'student' || !STUDENT_TYPES.includes(item.type),
+  );
+
+  const say = (message: string) => {
+    setNotice(message);
+    AccessibilityInfo.announceForAccessibility(message);
+  };
+
+  const add = (type: WidgetType) => {
+    store.addWidget(type);
+    setCatalogOpen(false);
+    say(`Виджет «${widgetTitle(type)}» добавлен в конец экрана.`);
+  };
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <Card>
+        <Text style={styles.label} nativeID="name-label">
+          Название интерфейса
+        </Text>
+        <TextInput
+          value={store.name}
+          onChangeText={store.setName}
+          maxLength={80}
+          placeholder="Например, Мой удобный банк"
+          accessibilityLabelledBy="name-label"
+          accessibilityLabel="Название интерфейса"
+          style={styles.input}
+        />
+        <View style={styles.status}>
+          <Ionicons
+            name={store.dirty ? 'ellipse' : 'checkmark-done'}
+            size={store.dirty ? 10 : 18}
+            color={store.dirty ? '#b08a2e' : C.green}
+          />
+          <Text style={styles.statusText}>
+            {store.dirty ? 'Есть несохранённые изменения' : 'Все изменения сохранены'}
+          </Text>
+        </View>
+      </Card>
+
+      <View style={styles.headingRow}>
+        <SectionTitle count={widgets.length}>Мой экран</SectionTitle>
+        <EditToggle />
+      </View>
+
+      <View style={[styles.workspace, { backgroundColor: tint(look.primary, 0.06, '#ffffff') }]}>
+        {widgets.length === 0 && (
+          <Text style={styles.empty}>Пока пусто. Добавьте первый виджет кнопкой ниже.</Text>
+        )}
+        {widgets.map((w, i) => (
+          <View
+            key={w.id}
+            style={[styles.widget, { backgroundColor: look.surface, borderColor: look.border }]}>
+            <WidgetView type={w.type} look={look} />
+            {editing && (
+              <View style={styles.controls} accessibilityLabel={`Действия с виджетом «${widgetTitle(w.type)}»`}>
+                <Text style={[styles.position, { color: look.muted }]}>
+                  {i + 1} из {widgets.length}
+                </Text>
+                <IconButton
+                  icon="arrow-up"
+                  label={`Поднять виджет «${widgetTitle(w.type)}» выше`}
+                  disabled={i === 0}
+                  color={look.onSurface}
+                  onPress={() => {
+                    store.moveWidget(w.id, -1);
+                    say(`«${widgetTitle(w.type)}» — позиция ${i} из ${widgets.length}.`);
+                  }}
+                />
+                <IconButton
+                  icon="arrow-down"
+                  label={`Опустить виджет «${widgetTitle(w.type)}» ниже`}
+                  disabled={i === widgets.length - 1}
+                  color={look.onSurface}
+                  onPress={() => {
+                    store.moveWidget(w.id, 1);
+                    say(`«${widgetTitle(w.type)}» — позиция ${i + 2} из ${widgets.length}.`);
+                  }}
+                />
+                <IconButton
+                  icon="trash-outline"
+                  label={`Удалить виджет «${widgetTitle(w.type)}»`}
+                  color={C.danger}
+                  onPress={() => {
+                    store.removeWidget(w.id);
+                    say(`Виджет «${widgetTitle(w.type)}» удалён.`);
+                  }}
+                />
+              </View>
+            )}
+          </View>
+        ))}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Добавить виджет"
+          accessibilityHint="Откроет список доступных виджетов"
+          onPress={() => setCatalogOpen(true)}
+          style={({ pressed }) => [styles.addButton, pressed && { opacity: 0.7 }]}>
+          <Ionicons name="add" size={26} color={C.green} />
+          <Text style={styles.addText}>Добавить виджет</Text>
+        </Pressable>
+      </View>
+
+      {notice ? (
+        <Text style={styles.notice} accessibilityLiveRegion="polite">
+          {notice}
+        </Text>
+      ) : null}
+
+      <Button
+        label="Сохранить"
+        icon="checkmark"
+        onPress={() =>
+          store.save()
+            ? say('Интерфейс сохранён. Он доступен во вкладке «Выбрать».')
+            : say('Введите название интерфейса.')
+        }
+      />
+
+      <Modal
+        visible={catalogOpen}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setCatalogOpen(false)}>
+        <View style={styles.backdrop}>
+          <SafeAreaView edges={['bottom']} style={styles.sheet}>
+            <View style={styles.sheetHeader}>
+              <SectionTitle count={available.length}>Добавить виджет</SectionTitle>
+              <IconButton icon="close" label="Закрыть список виджетов" onPress={() => setCatalogOpen(false)} />
+            </View>
+            <Text style={styles.sheetHint}>Нажмите на виджет, чтобы добавить его на экран.</Text>
+            <ScrollView contentContainerStyle={styles.catalog}>
+              {available.map((item) => (
+                <Pressable
+                  key={item.type}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${item.title}. ${item.description}`}
+                  accessibilityHint="Добавит виджет на экран"
+                  onPress={() => add(item.type)}
+                  style={({ pressed }) => [styles.catalogItem, pressed && { backgroundColor: C.greenSoft }]}>
+                  <View style={styles.catalogIcon}>
+                    <Ionicons name={item.icon} size={26} color={C.green} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.catalogTitle}>{item.title}</Text>
+                    <Text style={styles.catalogDesc}>{item.description}</Text>
+                  </View>
+                  <Ionicons name="add-circle-outline" size={28} color={C.green} />
+                </Pressable>
+              ))}
+            </ScrollView>
+          </SafeAreaView>
+        </View>
+      </Modal>
+    </ScrollView>
   );
 }
 
-export default function HomeScreen() {
+function EditToggle() {
+  const { editing, setEditing } = useStore();
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+    <Pressable
+      accessibilityRole="switch"
+      accessibilityLabel="Режим расстановки"
+      accessibilityState={{ checked: editing }}
+      onPress={() => setEditing(!editing)}
+      style={[styles.toggle, editing && styles.toggleOn]}>
+      <Ionicons name={editing ? 'construct' : 'eye-outline'} size={18} color={editing ? C.green : C.muted} />
+      <Text style={[styles.toggleText, editing && { color: C.green }]}>
+        {editing ? 'Расстановка' : 'Просмотр'}
+      </Text>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
+  content: { padding: 16, gap: 18, paddingBottom: 32 },
+  label: { fontSize: 16, fontWeight: '600', color: C.text },
+  input: {
+    marginTop: 10,
+    minHeight: 52,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    fontSize: 18,
+    color: C.text,
+  },
+  status: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10 },
+  statusText: { fontSize: 14, color: C.muted },
+  headingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  workspace: { borderRadius: 20, padding: 12, gap: 12, borderWidth: 1, borderColor: C.border },
+  widget: { borderRadius: 16, borderWidth: 1, padding: 16 },
+  controls: {
     flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    justifyContent: 'flex-end',
+    marginTop: 12,
+    gap: 4,
   },
-  heroSection: {
+  position: { fontSize: 14, marginRight: 'auto' },
+  empty: { fontSize: 16, color: C.muted, textAlign: 'center', padding: 16 },
+  addButton: {
+    minHeight: 56,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: '#9cc3a2',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    gap: 8,
   },
-  title: {
-    textAlign: 'center',
+  addText: { fontSize: 17, fontWeight: '600', color: C.green },
+  notice: {
+    fontSize: 15,
+    color: C.text,
+    backgroundColor: C.greenSoft,
+    padding: 12,
+    borderRadius: 12,
   },
-  code: {
-    textTransform: 'uppercase',
+  toggle: {
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: C.border,
+    backgroundColor: C.card,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  toggleOn: { backgroundColor: C.greenSoft, borderColor: '#b7d8bc' },
+  toggleText: { fontSize: 15, fontWeight: '600', color: C.muted },
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
+  sheet: {
+    backgroundColor: C.bg,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 16,
+    maxHeight: '85%',
   },
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  sheetHint: { fontSize: 15, color: C.muted, marginTop: 4, marginBottom: 12 },
+  catalog: { gap: 10, paddingBottom: 12 },
+  catalogItem: {
+    minHeight: 72,
+    backgroundColor: C.card,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: C.border,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  catalogIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: C.greenSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  catalogTitle: { fontSize: 17, fontWeight: '600', color: C.text },
+  catalogDesc: { fontSize: 14, color: C.muted, marginTop: 2 },
 });

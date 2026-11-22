@@ -1,0 +1,29 @@
+name: ✨ Идея / доработка
+description: Предложить новую возможность
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую проблему пользователя решаем
+      description: Кто пользователь и что ему сейчас мешает.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Предлагаемое решение
+    validations:
+      required: true
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Для какой группы пользователей
+      multiple: true
+      options:
+        - Пожилые люди
+        - Люди со слабым зрением
+        - Люди с когнитивными особенностями
+        - Люди с нарушениями моторики
+        - Студенты
+        - Все пользователи
