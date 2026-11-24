@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon as Ionicons } from '@/ui/Icon';
 import { useEffect, useState } from 'react';
 import { AccessibilityInfo, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   toggle: {
-    minHeight: 44,
+    minHeight: 48,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,

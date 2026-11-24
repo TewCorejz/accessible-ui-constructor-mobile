@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon as Ionicons } from '@/ui/Icon';
 import Slider from '@react-native-community/slider';
 import { useState } from 'react';
 import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
@@ -42,17 +42,17 @@ function ColorPicker({
       </Text>
       <Text style={styles.hint}>{hint}</Text>
       <View style={styles.swatches} accessibilityRole="radiogroup" accessibilityLabel={title}>
-        {presets.map((p) => {
-          const active = p.value === value.toLowerCase();
+        {presets.map(({ name, value: color }) => {
+          const active = color === value.toLowerCase();
           return (
             <Pressable
-              key={p.value}
+              key={color}
               accessibilityRole="radio"
-              accessibilityLabel={p.name}
+              accessibilityLabel={name}
               accessibilityState={{ checked: active }}
-              onPress={() => onChange(p.value)}
-              style={[styles.swatch, { backgroundColor: p.value }, active && styles.swatchActive]}>
-              {active && <Ionicons name="checkmark" size={24} color={readableOn(p.value)} />}
+              onPress={() => onChange(color)}
+              style={[styles.swatch, { backgroundColor: color }, active && styles.swatchActive]}>
+              {active && <Ionicons name="checkmark" size={24} color={readableOn(color)} />}
             </Pressable>
           );
         })}
