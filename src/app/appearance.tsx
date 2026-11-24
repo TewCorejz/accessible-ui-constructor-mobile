@@ -1,7 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Slider from '@react-native-community/slider';
 import { useState } from 'react';
-import { Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
+
+import { Text, TextInput } from '@/ui/Text';
 
 import { WidgetView } from '@/components/WidgetView';
 import {
@@ -14,6 +16,7 @@ import {
   isHexColor,
   readableOn,
 } from '@/lib/appearance';
+import { toExportObject } from '@/lib/configFormat';
 import { resolveLook, themeDefaults } from '@/lib/model';
 import { useStore } from '@/lib/store';
 import { Button, C, Card, IconButton, SectionTitle, confirmAction } from '@/ui/kit';
@@ -64,7 +67,7 @@ function ColorPicker({
             setCustom(text);
             if (isHexColor(next)) onChange(next.toLowerCase());
           }}
-          placeholder={`Свой цвет, например ${value}`}
+          placeholder={`Свой: ${value}`}
           autoCapitalize="none"
           autoCorrect={false}
           maxLength={7}
@@ -94,7 +97,7 @@ export default function AppearanceScreen() {
   const share = () =>
     Share.share({
       title: store.name,
-      message: JSON.stringify(store.currentConfig(), null, 2),
+      message: JSON.stringify(toExportObject(store.currentConfig()), null, 2),
     }).catch(() => {});
 
   return (
@@ -124,7 +127,12 @@ export default function AppearanceScreen() {
             maximumTrackTintColor="#c9d3cc"
             thumbTintColor={C.green}
             accessibilityLabel="Размер основного текста"
-            accessibilityValue={{ min: MIN_FONT_SIZE, max: MAX_FONT_SIZE, now: appearance.fontSize, text: `${appearance.fontSize} пикселей` }}
+            accessibilityValue={{
+              min: MIN_FONT_SIZE,
+              max: MAX_FONT_SIZE,
+              now: appearance.fontSize,
+              text: `${appearance.fontSize} пикселей`,
+            }}
           />
           <IconButton
             icon="add"
@@ -156,7 +164,11 @@ export default function AppearanceScreen() {
       <View
         style={[styles.contrast, good ? styles.contrastGood : styles.contrastLow]}
         accessibilityLiveRegion="polite">
-        <Ionicons name={good ? 'checkmark-circle' : 'alert-circle'} size={22} color={good ? '#23552f' : '#7a3d00'} />
+        <Ionicons
+          name={good ? 'checkmark-circle' : 'alert-circle'}
+          size={22}
+          color={good ? '#23552f' : '#7a3d00'}
+        />
         <Text style={[styles.contrastText, { color: good ? '#23552f' : '#7a3d00' }]}>
           Контраст {ratio.toFixed(1)}:1 —{' '}
           {good ? 'кнопки хорошо видны на фоне.' : 'низкий: кнопки могут сливаться с фоном.'}
@@ -172,10 +184,19 @@ export default function AppearanceScreen() {
         label="Сбросить оформление"
         icon="refresh"
         variant="secondary"
-        disabled={appearance.fontSize === BASE_FONT_SIZE && !appearance.primary && !appearance.secondary}
-        onPress={() => store.setAppearance({ fontSize: BASE_FONT_SIZE, primary: null, secondary: null })}
+        disabled={
+          appearance.fontSize === BASE_FONT_SIZE && !appearance.primary && !appearance.secondary
+        }
+        onPress={() =>
+          store.setAppearance({ fontSize: BASE_FONT_SIZE, primary: null, secondary: null })
+        }
       />
-      <Button label="Поделиться настройками" icon="share-outline" variant="secondary" onPress={share} />
+      <Button
+        label="Поделиться настройками"
+        icon="share-outline"
+        variant="secondary"
+        onPress={share}
+      />
       <Button
         label="Начать заново"
         icon="trash-outline"
@@ -196,7 +217,13 @@ export default function AppearanceScreen() {
 const styles = StyleSheet.create({
   content: { padding: 16, gap: 16, paddingBottom: 32 },
   gap: { gap: 10 },
-  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  rowBetween: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
   cardTitle: { fontSize: 19, fontWeight: '700', color: C.text },
   hint: { fontSize: 15, color: C.muted, lineHeight: 21 },
   sizeValue: {
@@ -234,7 +261,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: C.text,
   },
-  contrast: { flexDirection: 'row', gap: 10, padding: 14, borderRadius: 14, alignItems: 'flex-start' },
+  contrast: {
+    flexDirection: 'row',
+    gap: 10,
+    padding: 14,
+    borderRadius: 14,
+    alignItems: 'flex-start',
+  },
   contrastGood: { backgroundColor: '#eef7ec' },
   contrastLow: { backgroundColor: '#fdf1e3' },
   contrastText: { flex: 1, fontSize: 15, lineHeight: 21 },

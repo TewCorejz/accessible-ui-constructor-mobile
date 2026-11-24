@@ -51,10 +51,13 @@ function cleanWidgets(value: unknown): Widget[] | null {
   for (const [i, raw] of value.entries()) {
     const w = raw as Partial<Widget>;
     if (!w || !TYPES.includes(w.type as WidgetType)) return null;
+    // На телефоне все виджеты показываются во всю ширину, но ширина и колонка
+    // сохраняются — чтобы при переносе обратно на компьютер раскладка не потерялась.
     widgets.push({
       id: typeof w.id === 'string' && w.id ? w.id : `w-${i}-${Date.now()}`,
       type: w.type as WidgetType,
-      wide: true, // на телефоне виджеты всегда во всю ширину
+      wide: typeof w.wide === 'boolean' ? w.wide : true,
+      ...(w.column === 1 || w.column === 2 ? { column: w.column } : {}),
     });
   }
   return widgets;
@@ -104,9 +107,12 @@ type Store = State & {
   addWidget: (type: WidgetType) => void;
   removeWidget: (id: string) => void;
   moveWidget: (id: string, direction: -1 | 1) => void;
+  moveWidgetTo: (id: string, index: number) => void;
   setAppearance: (appearance: Appearance) => void;
   save: () => boolean;
   apply: (config: Config) => void;
+  /** Добавить импортированный интерфейс в «Сохранённые» и сразу применить. */
+  importConfig: (config: Config) => void;
   deleteSaved: (id: string) => void;
   newInterface: () => void;
   resetAll: () => void;
@@ -143,7 +149,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const update = useCallback(
     (patch: Partial<State> | ((s: State) => Partial<State>)) =>
-      setState((s) => ({ ...s, ...(typeof patch === 'function' ? patch(s) : patch) })),
+      setState((s) => ({
+        ...s,
+        ...(typeof patch === 'function' ? patch(s) : patch),
+      })),
     [],
   );
 
@@ -160,7 +169,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           dirty: true,
         })),
       removeWidget: (id) =>
-        update((s) => ({ widgets: s.widgets.filter((w) => w.id !== id), dirty: true })),
+        update((s) => ({
+          widgets: s.widgets.filter((w) => w.id !== id),
+          dirty: true,
+        })),
       moveWidget: (id, direction) =>
         update((s) => {
           const i = s.widgets.findIndex((w) => w.id === id);
@@ -168,6 +180,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           if (i < 0 || j < 0 || j >= s.widgets.length) return {};
           const widgets = [...s.widgets];
           [widgets[i], widgets[j]] = [widgets[j], widgets[i]];
+          return { widgets, dirty: true };
+        }),
+      moveWidgetTo: (id, index) =>
+        update((s) => {
+          const from = s.widgets.findIndex((w) => w.id === id);
+          if (from < 0 || index < 0 || index >= s.widgets.length || index === from) return {};
+          const widgets = [...s.widgets];
+          const [moved] = widgets.splice(from, 1);
+          widgets.splice(index, 0, moved);
           return { widgets, dirty: true };
         }),
       setAppearance: (appearance) => update({ appearance, dirty: true }),
@@ -198,6 +219,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           activeId: s.saved.some((c) => c.id === config.id) ? config.id : null,
           dirty: false,
         })),
+      importConfig: (config) => {
+        const saved: Config = { ...config, id: `saved-${Date.now()}` };
+        update((s) => ({
+          saved: [...s.saved, saved],
+          name: saved.name,
+          widgets: saved.widgets,
+          theme: saved.theme,
+          appearance: normalizeAppearance(saved.appearance ?? DEFAULT_APPEARANCE),
+          activeId: saved.id,
+          dirty: false,
+        }));
+      },
       deleteSaved: (id) =>
         update((s) => ({
           saved: s.saved.filter((c) => c.id !== id),

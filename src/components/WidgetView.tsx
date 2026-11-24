@@ -1,9 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 
 import { tint } from '@/lib/appearance';
 import type { Look, WidgetType } from '@/lib/model';
+import { MAX_FONT_SCALE, Text } from '@/ui/Text';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -13,12 +14,16 @@ export function WidgetView({ type, look }: { type: WidgetType; look: Look }) {
   const text = { color: look.onSurface, fontSize: t };
   const muted = { color: look.muted, fontSize: Math.round(t * 0.9) };
   const iconBg = tint(look.primary, 0.12, look.surface);
-  const stacked = t >= 19;
+  // Реальный размер текста = размер из «Оформления» × системный масштаб шрифта.
+  const { fontScale } = useWindowDimensions();
+  const stacked = t * Math.min(fontScale, MAX_FONT_SCALE) >= 19;
 
   const heading = (icon: IconName, title: string) => (
     <View style={styles.row}>
       <Ionicons name={icon} size={Math.round(t * 1.5)} color={look.primary} />
-      <Text accessibilityRole="header" style={[text, styles.bold, { fontSize: Math.round(t * 1.15) }]}>
+      <Text
+        accessibilityRole="header"
+        style={[text, styles.bold, { fontSize: Math.round(t * 1.15) }]}>
         {title}
       </Text>
     </View>
@@ -62,7 +67,11 @@ export function WidgetView({ type, look }: { type: WidgetType; look: Look }) {
       return (
         <View style={styles.gap}>
           {heading('wallet-outline', 'Мой баланс')}
-          <Text style={[text, styles.balance, { fontSize: Math.round(t * 2.4) }]}>
+          <Text
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.5}
+            style={[text, styles.balance, { fontSize: Math.round(t * 2.4) }]}>
             128 450<Text style={{ fontSize: Math.round(t * 1.5) }}>,00 ₽</Text>
           </Text>
           <View style={styles.between}>
@@ -77,7 +86,9 @@ export function WidgetView({ type, look }: { type: WidgetType; look: Look }) {
           <View style={[styles.qrIcon, { backgroundColor: iconBg }]}>
             <Ionicons name="qr-code-outline" size={Math.round(t * 2.6)} color={look.primary} />
           </View>
-          <Text style={[text, styles.bold, { fontSize: Math.round(t * 1.15) }]}>Оплата по QR-коду</Text>
+          <Text style={[text, styles.bold, { fontSize: Math.round(t * 1.15) }]}>
+            Оплата по QR-коду
+          </Text>
           <Text style={muted}>Оплата без ввода реквизитов</Text>
           {action('Показать QR-код')}
         </View>
@@ -98,7 +109,9 @@ export function WidgetView({ type, look }: { type: WidgetType; look: Look }) {
               <View
                 style={[
                   styles.avatar,
-                  { backgroundColor: op.income ? iconBg : tint(look.onSurface, 0.08, look.surface) },
+                  {
+                    backgroundColor: op.income ? iconBg : tint(look.onSurface, 0.08, look.surface),
+                  },
                 ]}>
                 <Ionicons
                   name={op.income ? 'arrow-down' : 'arrow-up'}
@@ -111,11 +124,15 @@ export function WidgetView({ type, look }: { type: WidgetType; look: Look }) {
                 <Text style={muted}>{op.date}</Text>
                 {/* При крупном тексте сумма уходит под название, чтобы строки не дробились */}
                 {stacked && (
-                  <Text style={[text, styles.bold, op.income && { color: look.primary }]}>{op.sum}</Text>
+                  <Text style={[text, styles.bold, op.income && { color: look.primary }]}>
+                    {op.sum}
+                  </Text>
                 )}
               </View>
               {!stacked && (
-                <Text style={[text, styles.bold, op.income && { color: look.primary }]}>{op.sum}</Text>
+                <Text style={[text, styles.bold, op.income && { color: look.primary }]}>
+                  {op.sum}
+                </Text>
               )}
             </View>
           ))}
@@ -188,5 +205,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   operation: { paddingVertical: 4 },
-  avatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
