@@ -51,10 +51,13 @@ function cleanWidgets(value: unknown): Widget[] | null {
   for (const [i, raw] of value.entries()) {
     const w = raw as Partial<Widget>;
     if (!w || !TYPES.includes(w.type as WidgetType)) return null;
+    // На телефоне все виджеты показываются во всю ширину, но ширина и колонка
+    // сохраняются — чтобы при переносе обратно на компьютер раскладка не потерялась.
     widgets.push({
       id: typeof w.id === 'string' && w.id ? w.id : `w-${i}-${Date.now()}`,
       type: w.type as WidgetType,
-      wide: true, // на телефоне виджеты всегда во всю ширину
+      wide: typeof w.wide === 'boolean' ? w.wide : true,
+      ...(w.column === 1 || w.column === 2 ? { column: w.column } : {}),
     });
   }
   return widgets;
@@ -107,6 +110,8 @@ type Store = State & {
   setAppearance: (appearance: Appearance) => void;
   save: () => boolean;
   apply: (config: Config) => void;
+  /** Добавить импортированный интерфейс в «Сохранённые» и сразу применить. */
+  importConfig: (config: Config) => void;
   deleteSaved: (id: string) => void;
   newInterface: () => void;
   resetAll: () => void;
@@ -198,6 +203,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           activeId: s.saved.some((c) => c.id === config.id) ? config.id : null,
           dirty: false,
         })),
+      importConfig: (config) => {
+        const saved: Config = { ...config, id: `saved-${Date.now()}` };
+        update((s) => ({
+          saved: [...s.saved, saved],
+          name: saved.name,
+          widgets: saved.widgets,
+          theme: saved.theme,
+          appearance: normalizeAppearance(saved.appearance ?? DEFAULT_APPEARANCE),
+          activeId: saved.id,
+          dirty: false,
+        }));
+      },
       deleteSaved: (id) =>
         update((s) => ({
           saved: s.saved.filter((c) => c.id !== id),

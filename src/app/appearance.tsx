@@ -14,6 +14,7 @@ import {
   isHexColor,
   readableOn,
 } from '@/lib/appearance';
+import { toExportObject } from '@/lib/configFormat';
 import { resolveLook, themeDefaults } from '@/lib/model';
 import { useStore } from '@/lib/store';
 import { Button, C, Card, IconButton, SectionTitle, confirmAction } from '@/ui/kit';
@@ -94,7 +95,7 @@ export default function AppearanceScreen() {
   const share = () =>
     Share.share({
       title: store.name,
-      message: JSON.stringify(store.currentConfig(), null, 2),
+      message: JSON.stringify(toExportObject(store.currentConfig()), null, 2),
     }).catch(() => {});
 
   return (
