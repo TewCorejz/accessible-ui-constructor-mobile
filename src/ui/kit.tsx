@@ -5,11 +5,12 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   View,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+
+import { Text } from '@/ui/Text';
 
 /** Цвета самого приложения (не путать с оформлением собранного интерфейса). */
 export const C = {
@@ -149,7 +150,13 @@ const styles = StyleSheet.create({
     borderColor: C.border,
     padding: 18,
   },
-  sectionTitle: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  sectionTitle: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 10,
+    flexShrink: 1,
+  },
   sectionTitleText: { fontSize: 22, fontWeight: '700', color: C.text },
   badge: {
     backgroundColor: '#e9eeea',
@@ -161,7 +168,12 @@ const styles = StyleSheet.create({
 });
 
 /** Подтверждение действия: системный диалог на телефоне, window.confirm в веб-превью. */
-export function confirmAction(title: string, message: string, actionLabel: string, onConfirm: () => void) {
+export function confirmAction(
+  title: string,
+  message: string,
+  actionLabel: string,
+  onConfirm: () => void,
+) {
   if (Platform.OS === 'web') {
     if (globalThis.confirm?.(`${title}\n\n${message}`)) onConfirm();
     return;

@@ -3,9 +3,11 @@ import { Tabs } from 'expo-router/js-tabs';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { StoreProvider, useStore } from '@/lib/store';
 import { C } from '@/ui/kit';
+import { Text } from '@/ui/Text';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -19,44 +21,64 @@ function HideSplashWhenReady() {
 
 export default function RootLayout() {
   return (
-    <StoreProvider>
-      <HideSplashWhenReady />
-      <StatusBar style="dark" />
-      <Tabs
-        screenOptions={{
-          headerStyle: { backgroundColor: C.card },
-          headerTitleStyle: { fontSize: 20, fontWeight: '700', color: C.text },
-          headerShadowVisible: false,
-          sceneStyle: { backgroundColor: C.bg },
-          tabBarActiveTintColor: C.green,
-          tabBarInactiveTintColor: C.muted,
-          tabBarLabelStyle: { fontSize: 13, fontWeight: '600' },
-          tabBarStyle: { minHeight: 64, paddingTop: 6, borderTopColor: C.border },
-        }}>
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: 'Мой банк',
-            tabBarIcon: ({ color, size }) => <Ionicons name="grid-outline" color={color as string} size={size} />,
-          }}
-        />
-        <Tabs.Screen
-          name="choose"
-          options={{
-            title: 'Выбрать',
-            tabBarIcon: ({ color, size }) => <Ionicons name="albums-outline" color={color as string} size={size} />,
-          }}
-        />
-        <Tabs.Screen
-          name="appearance"
-          options={{
-            title: 'Оформление',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="color-palette-outline" color={color as string} size={size} />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <StoreProvider>
+        <HideSplashWhenReady />
+        <StatusBar style="dark" />
+        <Tabs
+          screenOptions={{
+            headerStyle: { backgroundColor: C.card },
+            // Заголовок дублирует подпись вкладки — растёт с системным шрифтом умеренно,
+            // чтобы не обрезаться на самых крупных размерах.
+            headerTitle: ({ children }) => (
+              <Text
+                accessibilityRole="header"
+                maxFontSizeMultiplier={1.4}
+                numberOfLines={1}
+                style={{ fontSize: 20, fontWeight: '700', color: C.text }}>
+                {children}
+              </Text>
             ),
-          }}
-        />
-      </Tabs>
-    </StoreProvider>
+            headerShadowVisible: false,
+            sceneStyle: { backgroundColor: C.bg },
+            tabBarActiveTintColor: C.green,
+            tabBarInactiveTintColor: C.muted,
+            tabBarLabelStyle: { fontSize: 13, fontWeight: '600' },
+            tabBarStyle: {
+              minHeight: 64,
+              paddingTop: 6,
+              borderTopColor: C.border,
+            },
+          }}>
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: 'Мой банк',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="grid-outline" color={color as string} size={size} />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="choose"
+            options={{
+              title: 'Выбрать',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="albums-outline" color={color as string} size={size} />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="appearance"
+            options={{
+              title: 'Оформление',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="color-palette-outline" color={color as string} size={size} />
+              ),
+            }}
+          />
+        </Tabs>
+      </StoreProvider>
+    </GestureHandlerRootView>
   );
 }

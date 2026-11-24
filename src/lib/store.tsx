@@ -107,6 +107,7 @@ type Store = State & {
   addWidget: (type: WidgetType) => void;
   removeWidget: (id: string) => void;
   moveWidget: (id: string, direction: -1 | 1) => void;
+  moveWidgetTo: (id: string, index: number) => void;
   setAppearance: (appearance: Appearance) => void;
   save: () => boolean;
   apply: (config: Config) => void;
@@ -148,7 +149,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const update = useCallback(
     (patch: Partial<State> | ((s: State) => Partial<State>)) =>
-      setState((s) => ({ ...s, ...(typeof patch === 'function' ? patch(s) : patch) })),
+      setState((s) => ({
+        ...s,
+        ...(typeof patch === 'function' ? patch(s) : patch),
+      })),
     [],
   );
 
@@ -165,7 +169,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           dirty: true,
         })),
       removeWidget: (id) =>
-        update((s) => ({ widgets: s.widgets.filter((w) => w.id !== id), dirty: true })),
+        update((s) => ({
+          widgets: s.widgets.filter((w) => w.id !== id),
+          dirty: true,
+        })),
       moveWidget: (id, direction) =>
         update((s) => {
           const i = s.widgets.findIndex((w) => w.id === id);
@@ -173,6 +180,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           if (i < 0 || j < 0 || j >= s.widgets.length) return {};
           const widgets = [...s.widgets];
           [widgets[i], widgets[j]] = [widgets[j], widgets[i]];
+          return { widgets, dirty: true };
+        }),
+      moveWidgetTo: (id, index) =>
+        update((s) => {
+          const from = s.widgets.findIndex((w) => w.id === id);
+          if (from < 0 || index < 0 || index >= s.widgets.length || index === from) return {};
+          const widgets = [...s.widgets];
+          const [moved] = widgets.splice(from, 1);
+          widgets.splice(index, 0, moved);
           return { widgets, dirty: true };
         }),
       setAppearance: (appearance) => update({ appearance, dirty: true }),
