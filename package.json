@@ -46,7 +46,10 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:android": "eas build --profile preview --platform android",
+    "build:ios": "eas build --profile preview --platform ios",
+    "build:ios-sim": "eas build --profile preview-simulator --platform ios"
   },
   "private": true
 }

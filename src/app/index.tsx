@@ -1,15 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from 'react';
-import {
-  AccessibilityInfo,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { AccessibilityInfo, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+
+import { Text, TextInput } from '@/ui/Text';
 import { ScrollView as GestureScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -61,7 +54,9 @@ export default function HomeScreen() {
         <TextInput
           underlineColorAndroid="transparent"
           value={store.name}
-          onChangeText={store.setName}
+          onChangeText={(text) => store.setName(text.replace(/\n/g, ' '))}
+          multiline
+          submitBehavior="blurAndSubmit"
           maxLength={80}
           placeholder="Например, Мой удобный банк"
           accessibilityLabelledBy="name-label"
@@ -203,7 +198,12 @@ export default function HomeScreen() {
         transparent
         onRequestClose={() => setCatalogOpen(false)}>
         <View style={styles.backdrop}>
-          <SafeAreaView edges={['bottom']} style={styles.sheet}>
+          <SafeAreaView
+            edges={['bottom']}
+            style={styles.sheet}
+            // VoiceOver не уходит за пределы панели; жест «Z» (Escape) закрывает её.
+            accessibilityViewIsModal
+            onAccessibilityEscape={() => setCatalogOpen(false)}>
             <View style={styles.sheetHeader}>
               <SectionTitle count={available.length}>Добавить виджет</SectionTitle>
               <IconButton
@@ -282,8 +282,10 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 14, color: C.muted },
   headingRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 10,
   },
   workspace: {
     borderRadius: 20,
