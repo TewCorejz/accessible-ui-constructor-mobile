@@ -55,7 +55,11 @@
 - перестановка виджетов доступна скринридеру через действия «Поднять выше» / «Опустить ниже»;
 - цвет текста на фоне виджетов подбирается автоматически, низкий контраст подсвечивается.
 
-## 🚀 Запуск
+## 📲 Установить тестовую версию
+
+Android — APK из [Releases](https://github.com/TewCorejz/accessible-ui-constructor-mobile/releases); iPhone — через TestFlight. Подробно: [docs/install.md](docs/install.md).
+
+## 🚀 Запуск для разработки
 
 Нужны **Node.js 22** и приложение **Expo Go** на телефоне ([iOS](https://apps.apple.com/app/expo-go/id982107779) / [Android](https://play.google.com/store/apps/details?id=host.exp.exponent)).
 
@@ -101,7 +105,9 @@ src/
 - [x] Перетаскивание виджетов пальцем (долгое нажатие); кнопки «выше» / «ниже» и действия скринридера остаются
 - [x] Проверка с максимальным системным шрифтом, доработки для скринридеров — [docs/accessibility.md](docs/accessibility.md)
 - [ ] Проверка с VoiceOver и TalkBack на реальных устройствах
-- [ ] Сборка через EAS и тестовая раздача (TestFlight / внутреннее тестирование Google Play)
+- [x] Настройка сборки EAS (`eas.json`, профили preview / production) — [docs/install.md](docs/install.md)
+- [ ] Первая тестовая сборка Android и раздача через Releases
+- [ ] TestFlight (нужен аккаунт Apple Developer)
 
 ## 📄 Лицензия и правовая информация
 
