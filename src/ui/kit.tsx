@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon as Ionicons } from '@/ui/Icon';
 import type { ComponentProps, ReactNode } from 'react';
 import {
   Alert,
@@ -36,9 +36,12 @@ export function Button({
   variant = 'primary',
   disabled,
   accessibilityHint,
+  accessibilityLabel,
   style,
 }: {
   label: string;
+  /** Если на экране несколько одинаковых кнопок — уточнение для скринридера. */
+  accessibilityLabel?: string;
   icon?: IconName;
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'danger';
@@ -50,7 +53,7 @@ export function Button({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}

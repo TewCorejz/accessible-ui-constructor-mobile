@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon as Ionicons } from '@/ui/Icon';
 import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import { useRouter } from 'expo-router';
@@ -114,12 +114,14 @@ export default function ChooseScreen() {
           <View style={styles.actions}>
             <Button
               label="Применить"
+              accessibilityLabel={`Применить интерфейс «${config.name}»`}
               icon="checkmark"
               onPress={() => apply(config)}
               style={styles.actionButton}
             />
             <Button
               label="Удалить"
+              accessibilityLabel={`Удалить интерфейс «${config.name}»`}
               icon="trash-outline"
               variant="danger"
               style={styles.actionButton}

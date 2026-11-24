@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon as Ionicons } from '@/ui/Icon';
 import { Tabs } from 'expo-router/js-tabs';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -54,6 +54,7 @@ export default function RootLayout() {
             name="index"
             options={{
               title: 'Мой банк',
+              tabBarAccessibilityLabel: 'Мой банк',
               tabBarIcon: ({ color, size }) => (
                 <Ionicons name="grid-outline" color={color as string} size={size} />
               ),
@@ -63,6 +64,7 @@ export default function RootLayout() {
             name="choose"
             options={{
               title: 'Выбрать',
+              tabBarAccessibilityLabel: 'Выбрать',
               tabBarIcon: ({ color, size }) => (
                 <Ionicons name="albums-outline" color={color as string} size={size} />
               ),
@@ -72,6 +74,7 @@ export default function RootLayout() {
             name="appearance"
             options={{
               title: 'Оформление',
+              tabBarAccessibilityLabel: 'Оформление',
               tabBarIcon: ({ color, size }) => (
                 <Ionicons name="color-palette-outline" color={color as string} size={size} />
               ),
