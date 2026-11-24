@@ -41,6 +41,17 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "description": "Конструктор доступных банковских интерфейсов для пожилых людей и людей с инвалидностью."
+    "description": "Конструктор доступных банковских интерфейсов для пожилых людей и людей с инвалидностью.",
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "c6cf021a-3aa9-4ea5-9c54-64f2e975d43c"
+      }
+    },
+    "owner": "jordaniocli"
   }
 }
