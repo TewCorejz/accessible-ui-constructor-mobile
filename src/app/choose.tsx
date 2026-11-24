@@ -3,7 +3,9 @@ import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { AccessibilityInfo, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AccessibilityInfo, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+
+import { Text } from '@/ui/Text';
 
 import { WidgetView } from '@/components/WidgetView';
 import { normalizeAppearance } from '@/lib/appearance';
@@ -17,9 +19,17 @@ function Preview({ config }: { config: Config }) {
   const look = resolveLook(config.theme, normalizeAppearance(config.appearance));
   const small = { ...look, text: Math.min(look.text, 15) };
   return (
-    <View style={styles.preview} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+    <View
+      style={styles.preview}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants">
       {config.widgets.slice(0, 2).map((w) => (
-        <View key={w.id} style={[styles.previewWidget, { backgroundColor: look.surface, borderColor: look.border }]}>
+        <View
+          key={w.id}
+          style={[
+            styles.previewWidget,
+            { backgroundColor: look.surface, borderColor: look.border },
+          ]}>
           <WidgetView type={w.type} look={small} />
         </View>
       ))}
@@ -40,12 +50,20 @@ export default function ChooseScreen() {
     setImported(null);
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: ['application/json', 'application/yaml', 'text/yaml', 'application/xml', 'text/xml', '*/*'],
+        type: [
+          'application/json',
+          'application/yaml',
+          'text/yaml',
+          'application/xml',
+          'text/xml',
+          '*/*',
+        ],
         copyToCacheDirectory: true,
       });
       if (result.canceled) return;
       const asset = result.assets[0];
-      if (asset.size && asset.size > 2_000_000) throw new Error('Размер файла не должен превышать 2 МБ.');
+      if (asset.size && asset.size > 2_000_000)
+        throw new Error('Размер файла не должен превышать 2 МБ.');
       const text = await new File(asset.uri).text();
       const checked = validateConfig(await parseFile(asset.name, text));
       if (!checked.ok)
@@ -94,8 +112,19 @@ export default function ChooseScreen() {
             Виджетов: {config.widgets.length} · сохранён на этом устройстве
           </Text>
           <View style={styles.actions}>
-            <Button label="Применить" icon="checkmark" onPress={() => apply(config)} style={{ flex: 1 }} />
-            <Button label="Удалить" icon="trash-outline" variant="danger" onPress={() => confirmDelete(config)} />
+            <Button
+              label="Применить"
+              icon="checkmark"
+              onPress={() => apply(config)}
+              style={styles.actionButton}
+            />
+            <Button
+              label="Удалить"
+              icon="trash-outline"
+              variant="danger"
+              style={styles.actionButton}
+              onPress={() => confirmDelete(config)}
+            />
           </View>
         </Card>
       ))}
@@ -106,7 +135,12 @@ export default function ChooseScreen() {
         <Text style={styles.meta}>
           Файл JSON, YAML или XML из веб-версии конструктора или из «Поделиться настройками».
         </Text>
-        <Button label="Выбрать файл" icon="document-outline" variant="secondary" onPress={pickFile} />
+        <Button
+          label="Выбрать файл"
+          icon="document-outline"
+          variant="secondary"
+          onPress={pickFile}
+        />
         {importError ? (
           <View style={styles.error} accessibilityLiveRegion="assertive">
             <Ionicons name="alert-circle" size={20} color={C.danger} />
@@ -122,16 +156,23 @@ export default function ChooseScreen() {
               <Button
                 label="Применить"
                 icon="checkmark"
-                style={{ flex: 1 }}
+                style={styles.actionButton}
                 accessibilityHint="Добавит интерфейс в сохранённые и откроет его"
                 onPress={() => {
                   store.importConfig(imported);
-                  AccessibilityInfo.announceForAccessibility(`Интерфейс «${imported.name}» импортирован.`);
+                  AccessibilityInfo.announceForAccessibility(
+                    `Интерфейс «${imported.name}» импортирован.`,
+                  );
                   setImported(null);
                   router.navigate('/');
                 }}
               />
-              <Button label="Отмена" variant="secondary" onPress={() => setImported(null)} />
+              <Button
+                label="Отмена"
+                variant="secondary"
+                style={styles.actionButton}
+                onPress={() => setImported(null)}
+              />
             </View>
           </View>
         )}
@@ -156,7 +197,9 @@ export default function ChooseScreen() {
         <SectionTitle count={templates.length}>Шаблоны</SectionTitle>
         <Ionicons name={templatesOpen ? 'chevron-up' : 'chevron-down'} size={26} color={C.text} />
       </Pressable>
-      <Text style={styles.meta}>Готовые решения для разных потребностей. Выберите и настройте под себя.</Text>
+      <Text style={styles.meta}>
+        Готовые решения для разных потребностей. Выберите и настройте под себя.
+      </Text>
 
       {templatesOpen &&
         templates.map((t) => {
@@ -181,7 +224,9 @@ export default function ChooseScreen() {
                 onPress={() => setPreviewOf(open ? null : t.theme)}
                 style={styles.previewToggle}>
                 <Ionicons name="eye-outline" size={20} color={C.green} />
-                <Text style={styles.previewToggleText}>{open ? 'Скрыть превью' : 'Показать превью'}</Text>
+                <Text style={styles.previewToggleText}>
+                  {open ? 'Скрыть превью' : 'Показать превью'}
+                </Text>
               </Pressable>
               {open && <Preview config={templateConfig(t.theme)} />}
               <Button
@@ -213,11 +258,18 @@ const styles = StyleSheet.create({
   errorText: { flex: 1, fontSize: 15, lineHeight: 21, color: C.danger },
   savedHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   cardTitle: { fontSize: 20, fontWeight: '700', color: C.text, flexShrink: 1 },
-  activeBadge: { backgroundColor: C.greenSoft, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  activeBadge: {
+    backgroundColor: C.greenSoft,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
   activeText: { fontSize: 13, fontWeight: '600', color: C.green },
   meta: { fontSize: 15, color: C.muted, lineHeight: 21 },
   body: { fontSize: 16, color: C.text, lineHeight: 23 },
-  actions: { flexDirection: 'row', gap: 10 },
+  // При крупном системном шрифте кнопки встают друг под друга, а не ломают слова.
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  actionButton: { flexGrow: 1, flexShrink: 0 },
   disclosure: {
     minHeight: 56,
     marginTop: 12,

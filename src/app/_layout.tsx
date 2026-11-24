@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { StoreProvider, useStore } from '@/lib/store';
 import { C } from '@/ui/kit';
+import { Text } from '@/ui/Text';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -27,11 +28,17 @@ export default function RootLayout() {
         <Tabs
           screenOptions={{
             headerStyle: { backgroundColor: C.card },
-            headerTitleStyle: {
-              fontSize: 20,
-              fontWeight: '700',
-              color: C.text,
-            },
+            // Заголовок дублирует подпись вкладки — растёт с системным шрифтом умеренно,
+            // чтобы не обрезаться на самых крупных размерах.
+            headerTitle: ({ children }) => (
+              <Text
+                accessibilityRole="header"
+                maxFontSizeMultiplier={1.4}
+                numberOfLines={1}
+                style={{ fontSize: 20, fontWeight: '700', color: C.text }}>
+                {children}
+              </Text>
+            ),
             headerShadowVisible: false,
             sceneStyle: { backgroundColor: C.bg },
             tabBarActiveTintColor: C.green,
