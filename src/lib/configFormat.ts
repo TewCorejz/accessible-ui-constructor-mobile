@@ -13,7 +13,15 @@ export const SCHEMA_URL =
   'https://raw.githubusercontent.com/TewCorejz/accessible-ui-constructor/main/schema/interface-config.schema.json';
 
 const THEMES: ThemeName[] = ['default', 'senior', 'focus', 'contrast', 'student'];
-const TYPES: WidgetType[] = ['balance', 'qr', 'history', 'quick', 'studentQr', 'subscriptions', 'mobile'];
+const TYPES: WidgetType[] = [
+  'balance',
+  'qr',
+  'history',
+  'quick',
+  'studentQr',
+  'subscriptions',
+  'mobile',
+];
 
 /** Объект для экспорта / «Поделиться» — ровно те поля, что описаны в схеме. */
 export function toExportObject(config: Config) {
@@ -133,8 +141,14 @@ export function validateConfig(data: unknown): ValidationResult {
     if (!isObject(a)) errors.push('Блок оформления (appearance) повреждён.');
     else {
       const size = a.fontSize;
-      if (!Number.isInteger(size) || (size as number) < MIN_FONT_SIZE || (size as number) > MAX_FONT_SIZE)
-        errors.push(`Размер текста должен быть целым числом от ${MIN_FONT_SIZE} до ${MAX_FONT_SIZE}.`);
+      if (
+        !Number.isInteger(size) ||
+        (size as number) < MIN_FONT_SIZE ||
+        (size as number) > MAX_FONT_SIZE
+      )
+        errors.push(
+          `Размер текста должен быть целым числом от ${MIN_FONT_SIZE} до ${MAX_FONT_SIZE}.`,
+        );
       for (const key of ['primary', 'secondary'] as const) {
         const v = a[key];
         if (v !== undefined && v !== null && !isHexColor(v))
@@ -157,7 +171,8 @@ export function validateConfig(data: unknown): ValidationResult {
       if (!isObject(raw)) return errors.push(`Виджет ${n} повреждён.`);
       if (!TYPES.includes(raw.type as WidgetType))
         return errors.push(`Виджет ${n}: неизвестный тип «${String(raw.type)}».`);
-      if (typeof raw.wide !== 'boolean') return errors.push(`Виджет ${n}: не указана ширина (wide).`);
+      if (typeof raw.wide !== 'boolean')
+        return errors.push(`Виджет ${n}: не указана ширина (wide).`);
       if (raw.column !== undefined && raw.column !== 1 && raw.column !== 2)
         return errors.push(`Виджет ${n}: колонка должна быть 1 или 2.`);
       widgets.push({
