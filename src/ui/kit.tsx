@@ -10,21 +10,10 @@ import {
   type ViewStyle,
 } from 'react-native';
 
+import { makeStyles, useColors, type Palette } from '@/ui/theme';
 import { Text } from '@/ui/Text';
 
-/** Цвета самого приложения (не путать с оформлением собранного интерфейса). */
-export const C = {
-  bg: '#f4f7f5',
-  card: '#ffffff',
-  text: '#1f2a25',
-  muted: '#55625a',
-  border: '#dde5df',
-  green: '#157838',
-  greenSoft: '#e6f3e7',
-  danger: '#a3243b',
-  dangerSoft: '#fbecee',
-};
-
+/** Цвета приложения — src/ui/theme.tsx (useColors). */
 export const MIN_TOUCH = 48;
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -49,7 +38,9 @@ export function Button({
   accessibilityHint?: string;
   style?: StyleProp<ViewStyle>;
 }) {
-  const v = variants[variant];
+  const styles = useStyles();
+  const C = useColors();
+  const v = variants(C)[variant];
   return (
     <Pressable
       accessibilityRole="button"
@@ -61,7 +52,7 @@ export function Button({
       style={({ pressed }) => [
         styles.button,
         { backgroundColor: v.bg, borderColor: v.border },
-        pressed && { opacity: 0.8 },
+        pressed && { opacity: 0.92, transform: [{ scale: 0.97 }] },
         disabled && { opacity: 0.45 },
         style,
       ]}>
@@ -71,18 +62,18 @@ export function Button({
   );
 }
 
-const variants = {
-  primary: { bg: C.green, border: C.green, fg: '#ffffff' },
+const variants = (C: Palette) => ({
+  primary: { bg: C.green, border: C.green, fg: C.onGreen },
   secondary: { bg: C.card, border: C.border, fg: C.text },
-  danger: { bg: C.dangerSoft, border: '#f0c6cd', fg: C.danger },
-};
+  danger: { bg: C.dangerSoft, border: C.dark ? '#5a2a33' : '#f0c6cd', fg: C.danger },
+});
 
 export function IconButton({
   icon,
   label,
   onPress,
   disabled,
-  color = C.text,
+  color,
 }: {
   icon: IconName;
   label: string;
@@ -90,6 +81,8 @@ export function IconButton({
   disabled?: boolean;
   color?: string;
 }) {
+  const styles = useStyles();
+  const C = useColors();
   return (
     <Pressable
       accessibilityRole="button"
@@ -100,19 +93,21 @@ export function IconButton({
       hitSlop={4}
       style={({ pressed }) => [
         styles.iconButton,
-        pressed && { opacity: 0.7 },
+        pressed && { opacity: 0.75, transform: [{ scale: 0.92 }] },
         disabled && { opacity: 0.35 },
       ]}>
-      <Ionicons name={icon} size={24} color={color} />
+      <Ionicons name={icon} size={24} color={color ?? C.text} />
     </Pressable>
   );
 }
 
 export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
+  const styles = useStyles();
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
 export function SectionTitle({ children, count }: { children: string; count?: number }) {
+  const styles = useStyles();
   return (
     <View style={styles.sectionTitle}>
       <Text accessibilityRole="header" style={styles.sectionTitleText}>
@@ -127,48 +122,55 @@ export function SectionTitle({ children, count }: { children: string; count?: nu
   );
 }
 
-const styles = StyleSheet.create({
-  button: {
-    minHeight: 56,
-    borderRadius: 14,
-    borderWidth: 1,
-    paddingHorizontal: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  buttonText: { fontSize: 17, fontWeight: '600' },
-  iconButton: {
-    width: MIN_TOUCH,
-    height: MIN_TOUCH,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  card: {
-    backgroundColor: C.card,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: C.border,
-    padding: 18,
-  },
-  sectionTitle: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: 10,
-    flexShrink: 1,
-  },
-  sectionTitleText: { fontSize: 22, fontWeight: '700', color: C.text },
-  badge: {
-    backgroundColor: '#e9eeea',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  badgeText: { fontSize: 14, fontWeight: '600', color: C.muted },
-});
+const useStyles = makeStyles((C) =>
+  StyleSheet.create({
+    button: {
+      minHeight: 56,
+      borderRadius: 14,
+      borderWidth: 1,
+      paddingHorizontal: 18,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+    },
+    buttonText: { fontSize: 17, fontWeight: '600' },
+    iconButton: {
+      width: MIN_TOUCH,
+      height: MIN_TOUCH,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    card: {
+      backgroundColor: C.card,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: C.dark ? C.border : 'transparent',
+      padding: 18,
+      shadowColor: '#14402a',
+      shadowOpacity: C.dark ? 0 : 0.07,
+      shadowRadius: 14,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: C.dark ? 0 : 2,
+    },
+    sectionTitle: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      gap: 10,
+      flexShrink: 1,
+    },
+    sectionTitleText: { fontSize: 22, fontWeight: '700', color: C.text },
+    badge: {
+      backgroundColor: C.dark ? '#252d29' : '#e9eeea',
+      borderRadius: 8,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+    },
+    badgeText: { fontSize: 14, fontWeight: '600', color: C.muted },
+  }),
+);
 
 /** Подтверждение действия: системный диалог на телефоне, window.confirm в веб-превью. */
 export function confirmAction(

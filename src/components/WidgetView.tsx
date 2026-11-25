@@ -1,6 +1,7 @@
 import { Icon as Ionicons } from '@/ui/Icon';
 import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { makeStyles } from '@/ui/theme';
 
 import { tint } from '@/lib/appearance';
 import type { Look, WidgetType } from '@/lib/model';
@@ -10,6 +11,7 @@ type IconName = ComponentProps<typeof Ionicons>['name'];
 
 /** Демонстрационное содержимое виджета. Все суммы и операции вымышленные. */
 export function WidgetView({ type, look }: { type: WidgetType; look: Look }) {
+  const styles = useStyles();
   const t = look.text;
   const text = { color: look.onSurface, fontSize: t };
   const muted = { color: look.muted, fontSize: Math.round(t * 0.9) };
@@ -177,39 +179,41 @@ export function WidgetView({ type, look }: { type: WidgetType; look: Look }) {
   }
 }
 
-const styles = StyleSheet.create({
-  gap: { gap: 12 },
-  center: { alignItems: 'center' },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  between: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
-  flex: { flex: 1 },
-  bold: { fontWeight: '700' },
-  medium: { fontWeight: '600' },
-  balance: { fontWeight: '800', letterSpacing: -0.5 },
-  qrIcon: { padding: 12, borderRadius: 16 },
-  action: {
-    alignSelf: 'stretch',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  option: {
-    borderWidth: 1.5,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  operation: { paddingVertical: 4 },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const useStyles = makeStyles((C) =>
+  StyleSheet.create({
+    gap: { gap: 12 },
+    center: { alignItems: 'center' },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    between: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
+    flex: { flex: 1 },
+    bold: { fontWeight: '700' },
+    medium: { fontWeight: '600' },
+    balance: { fontWeight: '800', letterSpacing: -0.5 },
+    qrIcon: { padding: 12, borderRadius: 16 },
+    action: {
+      alignSelf: 'stretch',
+      borderRadius: 14,
+      paddingHorizontal: 16,
+      flexDirection: 'row',
+      gap: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    option: {
+      borderWidth: 1.5,
+      borderRadius: 14,
+      paddingHorizontal: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    operation: { paddingVertical: 4 },
+    avatar: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  }),
+);

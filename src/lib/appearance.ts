@@ -80,7 +80,8 @@ export function readableOn(background: string) {
 export function tint(hex: string, amount: number, over: string) {
   const mix = (i: number) =>
     Math.round(
-      parseInt(hex.slice(i, i + 2), 16) * amount + parseInt(over.slice(i, i + 2), 16) * (1 - amount),
+      parseInt(hex.slice(i, i + 2), 16) * amount +
+        parseInt(over.slice(i, i + 2), 16) * (1 - amount),
     )
       .toString(16)
       .padStart(2, '0');

@@ -6,13 +6,7 @@ import { BASE_FONT_SIZE, readableOn, type Appearance } from './appearance';
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
 export type WidgetType =
-  | 'balance'
-  | 'qr'
-  | 'history'
-  | 'quick'
-  | 'studentQr'
-  | 'subscriptions'
-  | 'mobile';
+  'balance' | 'qr' | 'history' | 'quick' | 'studentQr' | 'subscriptions' | 'mobile';
 
 export type Widget = { id: string; type: WidgetType; wide: boolean; column?: 1 | 2 };
 
@@ -34,13 +28,48 @@ export const catalog: {
   description: string;
   icon: IconName;
 }[] = [
-  { type: 'qr', title: 'Оплата по QR-коду', description: 'Платежи одним сканированием', icon: 'qr-code-outline' },
-  { type: 'history', title: 'История переводов', description: 'Все операции под рукой', icon: 'time-outline' },
-  { type: 'balance', title: 'Баланс', description: 'Средства на ваших счетах', icon: 'wallet-outline' },
-  { type: 'quick', title: 'Быстрая оплата', description: 'Важные платежи в один шаг', icon: 'flash-outline' },
-  { type: 'studentQr', title: 'Мои QR-коды', description: 'Пропуск, студенческий и оплата', icon: 'school-outline' },
-  { type: 'subscriptions', title: 'Подписки', description: 'Музыка, облако и учёба', icon: 'repeat-outline' },
-  { type: 'mobile', title: 'Мобильная связь', description: 'Тариф и баланс сим-карты', icon: 'phone-portrait-outline' },
+  {
+    type: 'qr',
+    title: 'Оплата по QR-коду',
+    description: 'Платежи одним сканированием',
+    icon: 'qr-code-outline',
+  },
+  {
+    type: 'history',
+    title: 'История переводов',
+    description: 'Все операции под рукой',
+    icon: 'time-outline',
+  },
+  {
+    type: 'balance',
+    title: 'Баланс',
+    description: 'Средства на ваших счетах',
+    icon: 'wallet-outline',
+  },
+  {
+    type: 'quick',
+    title: 'Быстрая оплата',
+    description: 'Важные платежи в один шаг',
+    icon: 'flash-outline',
+  },
+  {
+    type: 'studentQr',
+    title: 'Мои QR-коды',
+    description: 'Пропуск, студенческий и оплата',
+    icon: 'school-outline',
+  },
+  {
+    type: 'subscriptions',
+    title: 'Подписки',
+    description: 'Музыка, облако и учёба',
+    icon: 'repeat-outline',
+  },
+  {
+    type: 'mobile',
+    title: 'Мобильная связь',
+    description: 'Тариф и баланс сим-карты',
+    icon: 'phone-portrait-outline',
+  },
 ];
 
 export const widgetTitle = (type: WidgetType) =>
@@ -95,16 +124,27 @@ export const templates: {
 
 /** Базовые цвета и размер текста каждого шаблона. */
 const themeBase: Record<ThemeName, { primary: string; surface: string; scale: number }> = {
-  default: { primary: '#157838', surface: '#ffffff', scale: 1 },
-  senior: { primary: '#157838', surface: '#ffffff', scale: 24 / 16 },
+  default: { primary: '#178544', surface: '#ffffff', scale: 1 },
+  senior: { primary: '#178544', surface: '#ffffff', scale: 24 / 16 },
   focus: { primary: '#4b4f6b', surface: '#ffffff', scale: 1.25 },
   contrast: { primary: '#12150f', surface: '#ffe784', scale: 24 / 16 },
-  student: { primary: '#157838', surface: '#ffffff', scale: 1 },
+  student: { primary: '#178544', surface: '#ffffff', scale: 1 },
 };
 
-export const themeDefaults = (theme: ThemeName) => ({
-  primary: themeBase[theme].primary,
-  secondary: themeBase[theme].surface,
+/** Цвета шаблонов в тёмной теме приложения. «Высокий контраст» остаётся жёлто-чёрным. */
+const darkBase: Partial<Record<ThemeName, { primary: string; surface: string }>> = {
+  default: { primary: '#3ccf7d', surface: '#1b211e' },
+  senior: { primary: '#3ccf7d', surface: '#1b211e' },
+  focus: { primary: '#a9b0e0', surface: '#1b211e' },
+  student: { primary: '#3ccf7d', surface: '#1b211e' },
+};
+
+const baseColors = (theme: ThemeName, dark: boolean) =>
+  (dark && darkBase[theme]) || themeBase[theme];
+
+export const themeDefaults = (theme: ThemeName, dark = false) => ({
+  primary: baseColors(theme, dark).primary,
+  secondary: baseColors(theme, dark).surface,
 });
 
 /** Итоговые цвета и размеры, по которым рисуются виджеты. */
@@ -117,12 +157,15 @@ export type Look = {
   border: string;
   /** Размер основного текста в виджетах, px. */
   text: number;
+  /** Карта баланса — зелёный градиент «Классики» (если пользователь не выбрал свой фон). */
+  balanceGradient: [string, string, string] | null;
 };
 
-export function resolveLook(theme: ThemeName, appearance: Appearance): Look {
+export function resolveLook(theme: ThemeName, appearance: Appearance, appDark = false): Look {
   const base = themeBase[theme];
-  const primary = appearance.primary ?? base.primary;
-  const surface = appearance.secondary ?? base.surface;
+  const colors = baseColors(theme, appDark);
+  const primary = appearance.primary ?? colors.primary;
+  const surface = appearance.secondary ?? colors.surface;
   const onSurface = readableOn(surface);
   const dark = onSurface === '#ffffff';
   return {
@@ -133,6 +176,12 @@ export function resolveLook(theme: ThemeName, appearance: Appearance): Look {
     muted: dark ? '#c9d1cc' : theme === 'contrast' ? '#12150f' : '#5f6b64',
     border: dark ? '#3a4148' : theme === 'contrast' ? '#12150f' : '#dfe6dc',
     text: Math.round(BASE_FONT_SIZE * base.scale * (appearance.fontSize / BASE_FONT_SIZE)),
+    balanceGradient:
+      theme === 'contrast' || appearance.secondary
+        ? null
+        : appDark
+          ? ['#1e6b45', '#145136', '#0f3a2c']
+          : ['#178544', '#127a45', '#0d6a4f'], // белый текст не ниже 4.5:1
   };
 }
 

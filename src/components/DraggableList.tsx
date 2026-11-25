@@ -2,6 +2,8 @@ import * as Haptics from 'expo-haptics';
 import { useCallback, useRef, useState, type ReactNode } from 'react';
 import { View, type LayoutChangeEvent } from 'react-native';
 import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
+
+import { enterUp, fadeOut, reflow } from '@/ui/motion';
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -115,20 +117,23 @@ function Row({
   });
 
   return (
-    <GestureDetector gesture={pan}>
-      <Animated.View
-        onLayout={(e: LayoutChangeEvent) => onLayout(index, e.nativeEvent.layout.height)}
-        style={[
-          {
-            shadowColor: '#000',
-            shadowRadius: 12,
-            shadowOffset: { width: 0, height: 6 },
-          },
-          style,
-        ]}>
-        {children}
-      </Animated.View>
-    </GestureDetector>
+    // Внешняя обёртка — анимации «Плавного» пака: появление, удаление и перестановка.
+    <Animated.View entering={enterUp(0)} exiting={fadeOut} layout={reflow}>
+      <GestureDetector gesture={pan}>
+        <Animated.View
+          onLayout={(e: LayoutChangeEvent) => onLayout(index, e.nativeEvent.layout.height)}
+          style={[
+            {
+              shadowColor: '#000',
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 6 },
+            },
+            style,
+          ]}>
+          {children}
+        </Animated.View>
+      </GestureDetector>
+    </Animated.View>
   );
 }
 
