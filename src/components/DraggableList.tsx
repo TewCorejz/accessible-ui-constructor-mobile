@@ -1,10 +1,11 @@
 import * as Haptics from 'expo-haptics';
-import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { View, type LayoutChangeEvent } from 'react-native';
 import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
 
-import { enterUp, fadeOut, reflow } from '@/ui/motion';
+import { NewRing, enterRight, fadeOut, reflow } from '@/ui/motion';
 import Animated, {
+  LayoutAnimationConfig,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
@@ -50,9 +51,11 @@ function Row({
   onLayout,
   onStart,
   onEnd,
+  fresh,
   children,
 }: {
   index: number;
+  fresh: boolean;
   active: SharedValue<number>;
   dy: SharedValue<number>;
   heights: SharedValue<number[]>;
@@ -117,8 +120,10 @@ function Row({
   });
 
   return (
-    // Внешняя обёртка — анимации «Плавного» пака: появление, удаление и перестановка.
-    <Animated.View entering={enterUp(0)} exiting={fadeOut} layout={reflow}>
+    // Внешняя обёртка — анимации пака «Живой»: новый виджет выезжает справа и подсвечивается,
+    // удалённый растворяется, соседи плавно переставляются.
+    <Animated.View entering={enterRight} exiting={fadeOut} layout={reflow}>
+      {fresh && <NewRing />}
       <GestureDetector gesture={pan}>
         <Animated.View
           onLayout={(e: LayoutChangeEvent) => onLayout(index, e.nativeEvent.layout.height)}
@@ -155,6 +160,21 @@ export function DraggableList<T extends { id: string }>({
   const sizes = useRef<number[]>([]);
   const [draggingIndex, setDraggingIndex] = useState(-1);
 
+  // Только что добавленные элементы — для подсветки рамкой.
+  const knownIds = useRef<Set<string> | null>(null);
+  const [freshIds, setFreshIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    const ids = new Set(items.map((item) => item.id));
+    const known = knownIds.current;
+    knownIds.current = ids;
+    if (!known) return;
+    const added = [...ids].filter((id) => !known.has(id));
+    if (!added.length) return;
+    setFreshIds(new Set(added));
+    const timer = setTimeout(() => setFreshIds(new Set()), 2000);
+    return () => clearTimeout(timer);
+  }, [items]);
+
   const onLayout = useCallback(
     (index: number, height: number) => {
       sizes.current[index] = height;
@@ -186,21 +206,26 @@ export function DraggableList<T extends { id: string }>({
   );
 
   return (
-    <View style={{ gap: GAP }}>
-      {items.map((item, index) => (
-        <Row
-          key={item.id}
-          index={index}
-          active={active}
-          dy={dy}
-          heights={heights}
-          enabled={enabled}
-          onLayout={onLayout}
-          onStart={onStart}
-          onEnd={onEnd}>
-          {renderItem(item, index, draggingIndex === index)}
-        </Row>
-      ))}
-    </View>
+    // skipEntering: при открытии экрана список появляется целиком (Stagger),
+    // а «выезд справа» достаётся только добавленным потом виджетам.
+    <LayoutAnimationConfig skipEntering>
+      <View style={{ gap: GAP }}>
+        {items.map((item, index) => (
+          <Row
+            key={item.id}
+            index={index}
+            active={active}
+            dy={dy}
+            heights={heights}
+            enabled={enabled}
+            onLayout={onLayout}
+            onStart={onStart}
+            onEnd={onEnd}
+            fresh={freshIds.has(item.id)}>
+            {renderItem(item, index, draggingIndex === index)}
+          </Row>
+        ))}
+      </View>
+    </LayoutAnimationConfig>
   );
 }

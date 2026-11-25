@@ -1,6 +1,14 @@
 import { Icon as Ionicons } from '@/ui/Icon';
 import type { ComponentProps } from 'react';
-import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+  type StyleProp,
+  type TextStyle,
+} from 'react-native';
+import { groupDigits, useCountUp } from '@/ui/motion';
 import { makeStyles } from '@/ui/theme';
 
 import { tint } from '@/lib/appearance';
@@ -8,6 +16,22 @@ import type { Look, WidgetType } from '@/lib/model';
 import { MAX_FONT_SCALE, Text } from '@/ui/Text';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
+
+/** Сумма на карте досчитывается до значения (пак анимаций «Живой»). */
+function BalanceAmount({ style, t }: { style: StyleProp<TextStyle>; t: number }) {
+  const shown = useCountUp(128450);
+  return (
+    <Text
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      minimumFontScale={0.5}
+      accessibilityLabel="128 450,00 ₽"
+      style={style}>
+      {groupDigits(shown)}
+      <Text style={{ fontSize: Math.round(t * 1.5) }}>,00 ₽</Text>
+    </Text>
+  );
+}
 
 /** Демонстрационное содержимое виджета. Все суммы и операции вымышленные. */
 export function WidgetView({ type, look }: { type: WidgetType; look: Look }) {
@@ -69,13 +93,7 @@ export function WidgetView({ type, look }: { type: WidgetType; look: Look }) {
       return (
         <View style={styles.gap}>
           {heading('wallet-outline', 'Мой баланс')}
-          <Text
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.5}
-            style={[text, styles.balance, { fontSize: Math.round(t * 2.4) }]}>
-            128 450<Text style={{ fontSize: Math.round(t * 1.5) }}>,00 ₽</Text>
-          </Text>
+          <BalanceAmount style={[text, styles.balance, { fontSize: Math.round(t * 2.4) }]} t={t} />
           <View style={styles.between}>
             <Text style={muted}>Дебетовая карта</Text>
             <Text style={muted}>•• 4821</Text>

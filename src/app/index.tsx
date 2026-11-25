@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { AccessibilityInfo, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { makeStyles, useColors } from '@/ui/theme';
-import { Stagger } from '@/ui/motion';
+import { Stagger, useLoadingSkeleton } from '@/ui/motion';
 import { Text, TextInput } from '@/ui/Text';
 import { ScrollView as GestureScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,6 +23,7 @@ export default function HomeScreen() {
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [notice, setNotice] = useState('');
   const [dragging, setDragging] = useState(false);
+  const loading = useLoadingSkeleton();
   const look = resolveLook(theme, appearance, C.dark);
   const available = catalog.filter(
     (item) => theme === 'student' || !STUDENT_TYPES.includes(item.type),
@@ -107,7 +108,11 @@ export default function HomeScreen() {
                 say(`«${title}» — позиция ${to + 1} из ${widgets.length}.`);
               };
               return (
-                <WidgetCard type={w.type} look={look} highlight={isDragging}>
+                <WidgetCard
+                  type={w.type}
+                  look={look}
+                  highlight={isDragging}
+                  skeleton={loading && theme !== 'contrast'}>
                   {(lk) => (
                     <>
                       <WidgetView type={w.type} look={lk} />

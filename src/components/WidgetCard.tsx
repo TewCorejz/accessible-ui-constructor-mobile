@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { View, type StyleProp, type ViewStyle } from 'react-native';
 
 import type { Look, WidgetType } from '@/lib/model';
+import { Sheen, Skeleton } from '@/ui/motion';
 import { useColors } from '@/ui/theme';
 
 /**
@@ -15,12 +16,15 @@ export function WidgetCard({
   look,
   style,
   highlight,
+  skeleton = false,
   children,
 }: {
   type: WidgetType;
   look: Look;
   style?: StyleProp<ViewStyle>;
   highlight?: boolean;
+  /** Экран только что открылся — показать скелет поверх содержимого. */
+  skeleton?: boolean;
   children: (look: Look) => ReactNode;
 }) {
   const C = useColors();
@@ -53,8 +57,15 @@ export function WidgetCard({
         end={{ x: 1, y: 1 }}
         style={[base, { borderColor: highlight ? '#ffffff' : 'transparent' }, style]}>
         {children(onCard)}
+        {!skeleton && <Sheen />}
+        {skeleton && <Skeleton />}
       </LinearGradient>
     );
   }
-  return <View style={[base, { backgroundColor: look.surface }, style]}>{children(look)}</View>;
+  return (
+    <View style={[base, { backgroundColor: look.surface }, style]}>
+      {children(look)}
+      {skeleton && <Skeleton />}
+    </View>
+  );
 }
