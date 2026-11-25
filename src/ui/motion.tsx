@@ -4,7 +4,6 @@ import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
-  FadeInDown,
   FadeInRight,
   FadeOut,
   LinearTransition,
@@ -28,14 +27,6 @@ import { useColors } from './theme';
  */
 const EASE = Easing.bezier(0.2, 0.8, 0.2, 1);
 
-/** Вход блока экрана: поднимается и проявляется, блоки — по очереди. */
-export const enterUp = (index = 0) =>
-  FadeInDown.duration(420)
-    .delay(Math.min(index, 6) * 60)
-    .easing(EASE)
-    .withInitialValues({ transform: [{ translateY: 12 }] })
-    .reduceMotion(ReduceMotion.System);
-
 /** Новый виджет выезжает справа. */
 export const enterRight = FadeInRight.duration(480)
   .easing(EASE)
@@ -48,7 +39,7 @@ export const reflow = LinearTransition.duration(320).easing(EASE).reduceMotion(R
 export const fadeIn = FadeIn.duration(250).reduceMotion(ReduceMotion.System);
 export const fadeOut = FadeOut.duration(200).reduceMotion(ReduceMotion.System);
 
-/** Обёртка для блоков экрана. */
+/** Вход блока экрана: поднимается на 12 pt и проявляется, блоки — по очереди (шаг 60 мс). */
 export function Appear({
   index = 0,
   style,
@@ -58,8 +49,25 @@ export function Appear({
   style?: StyleProp<ViewStyle>;
   children: ReactNode;
 }) {
+  // Обычная анимация, а не entering: на Android entering первого блока при первом
+  // показе вкладки иногда не запускается, и блок остаётся невидимым (opacity 0).
+  const reduced = useReducedMotion();
+  const progress = useSharedValue(reduced ? 1 : 0);
+  useEffect(() => {
+    if (reduced) {
+      progress.set(1);
+      return;
+    }
+    progress.set(
+      withDelay(Math.min(index, 6) * 60, withTiming(1, { duration: 420, easing: EASE })),
+    );
+  }, [index, reduced, progress]);
+  const enter = useAnimatedStyle(() => ({
+    opacity: progress.get(),
+    transform: [{ translateY: (1 - progress.get()) * 12 }],
+  }));
   return (
-    <Animated.View entering={enterUp(index)} layout={reflow} style={style}>
+    <Animated.View layout={reflow} style={[style, enter]}>
       {children}
     </Animated.View>
   );
